@@ -1,0 +1,39 @@
+name: Benchmark
+
+# Manual only: real agents cost money and need secrets. Never run this on pull_request from forks.
+on:
+  workflow_dispatch:
+    inputs:
+      task:
+        description: "Task folder, for example tasks/001-rate-limiter"
+        default: tasks/001-rate-limiter
+      runs:
+        description: "Runs per agent"
+        default: "1"
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Benchmark with the deterministic fake agent (free)
+        run: npm run bench -- run "${{ inputs.task }}" fake-golden --runs "${{ inputs.runs }}" --out results
+      - name: Real agents (only when the secret exists)
+        if: ${{ secrets.ANTHROPIC_API_KEY != '' }}
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: echo "Install the agent CLI here, then: npm run bench -- run ${{ inputs.task }} claude-code --agents agents.example.json --runs ${{ inputs.runs }}"
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results
+          path: results/

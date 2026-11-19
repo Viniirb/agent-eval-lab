@@ -1,0 +1,14 @@
+[
+  {
+    "name": "claude-code",
+    "command": "claude",
+    "args": ["-p", "{{prompt}}", "--permission-mode", "acceptEdits"],
+    "timeoutMs": 600000
+  },
+  {
+    "name": "codex",
+    "command": "codex",
+    "args": ["exec", "--full-auto", "{{prompt}}"],
+    "timeoutMs": 600000
+  }
+]

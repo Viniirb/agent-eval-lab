@@ -1,0 +1,17 @@
+00|setup|Setup e hipóteses|basico
+01|specs|Specs que um agente consegue seguir|basico
+02|regras|Regras e padrões como dados|basico
+03|aceitacao|Testes de aceitação por requisito|basico
+04|verificadores|Verificadores de regras e globs|intermediario
+05|escopo|Guarda de escopo|intermediario
+06|pontuacao|Pontuação|intermediario
+07|sandbox|Sandbox isolado|intermediario
+08|adaptadores|Adaptadores de agente|intermediario
+09|relatorios|Relatórios|intermediario
+10|golden-mutantes|Validar o benchmark (golden e mutantes)|avancado
+11|tarefa-completa|Criando uma tarefa completa|avancado
+12|experimentos|Experimentos A/B|avancado
+13|ci-gate|CI e portão de regressão|avancado
+14|seguranca|Segurança: trapaça e injeção|avancado
+15|pipeline|Pipeline ponta a ponta|avancado
+16|experimento-real|Experimento real e relatório|avancado
