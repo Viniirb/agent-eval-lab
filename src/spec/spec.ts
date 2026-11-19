@@ -1,50 +1,33 @@
 import type { Level, Requirement } from '../types';
-
-const LINE = /^\s*[-*]\s+\*\*(R\d+)\s+\[(MUST|SHOULD|MAY)\]\*\*\s+(.+?)\s*$/;
+import { todo } from '../todo';
 
 /**
- * Reads requirements from a SPEC.md. Format of one requirement:
+ * M01. Reads requirements from a SPEC.md. Format of one requirement:
  *   - **R1 [MUST]** The limiter allows up to `limit` calls per window.
- * A line indented by 2+ spaces right after a requirement continues its text.
+ *
+ * Rules:
+ *  - the bullet can be `-` or `*`; ids can have many digits (R10); levels are MUST, SHOULD or MAY
+ *  - a line indented by 2 or more spaces right after a requirement CONTINUES its text (join with one space)
+ *  - any other line (headings, plain bullets, `**X1 [MUST]**`, `**R3 [MUST ]**`) is ignored and ends a continuation
+ * Hint: one regular expression with groups, and a variable that remembers the requirement being read.
  */
 export function parseSpec(markdown: string): Requirement[] {
-  const requirements: Requirement[] = [];
-  let current: Requirement | undefined;
-  for (const line of markdown.split(/\r?\n/)) {
-    const match = LINE.exec(line);
-    if (match) {
-      current = { id: match[1] as string, level: match[2] as Level, text: match[3] as string };
-      requirements.push(current);
-    } else if (current && /^\s{2,}\S/.test(line)) {
-      current.text += ' ' + line.trim();
-    } else {
-      current = undefined;
-    }
-  }
-  return requirements;
+  void markdown;
+  return todo('M01', 'implement parseSpec');
 }
 
-/** MUST counts 3, SHOULD 2, MAY 1: a failed MUST hurts more than a failed MAY. */
+/** M01. MUST counts 3, SHOULD 2, MAY 1: a failed MUST hurts more than a failed MAY. */
 export function weightOf(level: Level): number {
-  switch (level) {
-    case 'MUST':
-      return 3;
-    case 'SHOULD':
-      return 2;
-    case 'MAY':
-      return 1;
-  }
+  void level;
+  return todo('M01', 'implement weightOf');
 }
 
-/** A spec is usable when ids are unique, text is not empty and at least one requirement is MUST. */
+/**
+ * M01. A spec is usable when ids are unique, no text is empty and at least one requirement is MUST.
+ * Return ALL problems (not only the first), with these exact messages:
+ *   `duplicate id R1` · `R1 has no text` · `the spec needs at least one MUST requirement`
+ */
 export function validateSpec(requirements: Requirement[]): string[] {
-  const errors: string[] = [];
-  const seen = new Set<string>();
-  for (const r of requirements) {
-    if (seen.has(r.id)) errors.push(`duplicate id ${r.id}`);
-    seen.add(r.id);
-    if (!r.text.trim()) errors.push(`${r.id} has no text`);
-  }
-  if (!requirements.some((r) => r.level === 'MUST')) errors.push('the spec needs at least one MUST requirement');
-  return errors;
+  void requirements;
+  return todo('M01', 'implement validateSpec');
 }

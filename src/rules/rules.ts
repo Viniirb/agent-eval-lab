@@ -1,5 +1,7 @@
 import type { Rule } from '../types';
+import { todo } from '../todo';
 
+/** Given: carries EVERY problem found, so the person fixing RULES.md sees them all at once. */
 export class RuleError extends Error {
   constructor(public readonly issues: string[]) {
     super(issues.join('; '));
@@ -7,74 +9,26 @@ export class RuleError extends Error {
   }
 }
 
-function isRegex(source: unknown): boolean {
-  if (typeof source !== 'string') return false;
-  try {
-    new RegExp(source);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-function isStringArray(value: unknown): value is string[] {
-  return Array.isArray(value) && value.length > 0 && value.every((v) => typeof v === 'string' && v.length > 0);
-}
-
 /**
- * Reads the rules of a RULES.md: the FIRST ```json fenced block, an array of rule objects.
- * The file is untrusted input (an agent or a person edited it), so every field is validated and ALL problems are reported at once.
+ * M02. Reads the rules of a RULES.md: the FIRST ```json fenced block, an array of rule objects.
+ * The file is untrusted input (an agent or a person edited it), so validate EVERY field and report ALL problems.
+ *
+ * Throw `new RuleError([...])` with these messages (rule numbers are 1-based, in the array order):
+ *  - no block:           'no ```json block found'
+ *  - broken JSON:        `invalid JSON: ${error.message}`
+ *  - not an array:       'the JSON block must be an array of rules'
+ *  - not an object:      `rule #N: must be an object`
+ *  - bad id:             `rule #N: id must look like RULE-001`      (pattern /^RULE-\d{3}$/)
+ *  - repeated id:        `rule #N: duplicate id RULE-001`
+ *  - no message:         `rule #N: message is required`
+ *  - unknown kind:       `rule #N: unknown kind "magic"`
+ *  - forbidden-pattern:  `rule #N: pattern must be a valid regular expression` and
+ *                        `rule #N: paths must be a non-empty array of globs`
+ *  - required-file:      `rule #N: path is required`
+ *  - import-boundary:    `rule #N: from (glob) is required` and `rule #N: disallow must be a valid regular expression`
+ * Return the rules only when there are no problems at all. Look at tests/m02-rules.test.ts for every case.
  */
 export function parseRules(markdown: string): Rule[] {
-  const block = /```json\s*\n([\s\S]*?)\n```/.exec(markdown);
-  if (!block) throw new RuleError(['no ```json block found']);
-
-  let data: unknown;
-  try {
-    data = JSON.parse(block[1] as string);
-  } catch (error) {
-    throw new RuleError([`invalid JSON: ${(error as Error).message}`]);
-  }
-  if (!Array.isArray(data)) throw new RuleError(['the JSON block must be an array of rules']);
-
-  const issues: string[] = [];
-  const rules: Rule[] = [];
-  const seen = new Set<string>();
-
-  data.forEach((raw, index) => {
-    const where = `rule #${index + 1}`;
-    if (typeof raw !== 'object' || raw === null) {
-      issues.push(`${where}: must be an object`);
-      return;
-    }
-    const r = raw as Record<string, unknown>;
-    const before = issues.length;
-
-    if (typeof r.id !== 'string' || !/^RULE-\d{3}$/.test(r.id)) issues.push(`${where}: id must look like RULE-001`);
-    else if (seen.has(r.id)) issues.push(`${where}: duplicate id ${r.id}`);
-    else seen.add(r.id);
-
-    if (typeof r.message !== 'string' || !r.message.trim()) issues.push(`${where}: message is required`);
-
-    switch (r.kind) {
-      case 'forbidden-pattern':
-        if (!isRegex(r.pattern)) issues.push(`${where}: pattern must be a valid regular expression`);
-        if (!isStringArray(r.paths)) issues.push(`${where}: paths must be a non-empty array of globs`);
-        break;
-      case 'required-file':
-        if (typeof r.path !== 'string' || !r.path) issues.push(`${where}: path is required`);
-        break;
-      case 'import-boundary':
-        if (typeof r.from !== 'string' || !r.from) issues.push(`${where}: from (glob) is required`);
-        if (!isRegex(r.disallow)) issues.push(`${where}: disallow must be a valid regular expression`);
-        break;
-      default:
-        issues.push(`${where}: unknown kind "${String(r.kind)}"`);
-    }
-
-    if (issues.length === before) rules.push(r as unknown as Rule);
-  });
-
-  if (issues.length > 0) throw new RuleError(issues);
-  return rules;
+  void markdown;
+  return todo('M02', 'implement parseRules');
 }

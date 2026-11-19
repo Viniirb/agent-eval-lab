@@ -1,3 +1,5 @@
+import { todo } from '../todo';
+
 export interface RunSummary {
   meanScore: number;
   runs: number;
@@ -11,50 +13,34 @@ export interface GatePolicy {
   minRuns?: number; // fewest runs we trust (default 1)
 }
 
-/** Reads a results/summary.json. Throws an Error listing the problems when it is malformed. */
+/**
+ * M13. Reads a results/summary.json. Throws an Error whose message joins ALL problems with "; ":
+ *  - 'meanScore must be a number from 0 to 100'
+ *  - 'runs must be a positive integer'
+ *  - 'perTask must map task ids to numbers'
+ */
 export function parseSummary(json: unknown): RunSummary {
-  const s = (typeof json === 'object' && json !== null ? json : {}) as Record<string, unknown>;
-  const problems: string[] = [];
-  if (typeof s.meanScore !== 'number' || s.meanScore < 0 || s.meanScore > 100) problems.push('meanScore must be a number from 0 to 100');
-  if (!Number.isInteger(s.runs) || (s.runs as number) < 1) problems.push('runs must be a positive integer');
-  const perTask = s.perTask as Record<string, unknown> | undefined;
-  if (typeof perTask !== 'object' || perTask === null || !Object.values(perTask).every((v) => typeof v === 'number')) {
-    problems.push('perTask must map task ids to numbers');
-  }
-  if (problems.length > 0) throw new Error(problems.join('; '));
-  return s as unknown as RunSummary;
+  void json;
+  return todo('M13', 'implement parseSummary');
 }
 
 /**
- * Should the pipeline fail? Returns every reason (not just the first):
- *  - mean score below `minScore`
- *  - fewer runs than `minRuns`
- *  - the mean dropped by more than `maxDrop` versus the baseline (when there is a baseline)
- *  - a task present in the baseline is missing now, or dropped by more than `maxTaskDrop`
- * A drop of exactly the limit is allowed. `pass` is true when there are no reasons.
+ * M13. Should the pipeline fail? Return EVERY reason (not just the first), in this order, with these exact messages:
+ *  - `mean score 60 is below the minimum 70`
+ *  - `only 1 runs (minimum 3)`                         (when runs < minRuns, default minRuns = 1)
+ *  - `mean score dropped 5.1 points (limit 5)`        (only with a baseline; drop = baseline - current, ROUNDED to 1 decimal in the text;
+ *                                                      a drop EQUAL to the limit is allowed)
+ *  - for each baseline task, in order: `task b is missing from the current run`, or when `maxTaskDrop` is set and
+ *    the drop is bigger than it: `task b dropped 11 points (limit 10)`
+ * `pass` is true when there are no reasons.
  */
 export function evaluateGate(
   current: RunSummary,
   baseline: RunSummary | undefined,
   policy: GatePolicy,
 ): { pass: boolean; reasons: string[] } {
-  const reasons: string[] = [];
-  if (current.meanScore < policy.minScore) reasons.push(`mean score ${current.meanScore} is below the minimum ${policy.minScore}`);
-  if (current.runs < (policy.minRuns ?? 1)) reasons.push(`only ${current.runs} runs (minimum ${policy.minRuns})`);
-
-  if (baseline) {
-    const drop = baseline.meanScore - current.meanScore;
-    if (drop > policy.maxDrop) reasons.push(`mean score dropped ${round(drop)} points (limit ${policy.maxDrop})`);
-    for (const [task, before] of Object.entries(baseline.perTask)) {
-      const now = current.perTask[task];
-      if (now === undefined) {
-        reasons.push(`task ${task} is missing from the current run`);
-      } else if (policy.maxTaskDrop !== undefined && before - now > policy.maxTaskDrop) {
-        reasons.push(`task ${task} dropped ${round(before - now)} points (limit ${policy.maxTaskDrop})`);
-      }
-    }
-  }
-  return { pass: reasons.length === 0, reasons };
+  void current;
+  void baseline;
+  void policy;
+  return todo('M13', 'implement evaluateGate');
 }
-
-const round = (n: number) => Math.round(n * 10) / 10;

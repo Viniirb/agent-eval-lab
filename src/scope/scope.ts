@@ -1,29 +1,17 @@
 import type { FileChange, ScopePolicy, ScopeReport } from '../types';
-import { matchesAny } from '../rules/glob';
+import { todo } from '../todo';
 
 /**
- * Did the agent stay inside its lane?
- *  - `protectedTouched`: any change (added, modified OR deleted) to a protected path. This has priority over "out of scope".
- *  - `outOfScope`: changes to paths that are neither allowed nor protected.
- *  - `tooManyFiles`: more changed files than `maxFilesChanged` (when set).
- *  - `ok`: none of the above. Lists are sorted alphabetically.
+ * M05. Did the agent stay inside its lane?
+ *  - `protectedTouched`: any change (added, modified OR deleted) to a path matching `policy.protected`.
+ *    This has PRIORITY: such a path is never listed as out of scope.
+ *  - `outOfScope`: changes to paths that are neither protected nor allowed (`policy.allowed`).
+ *  - `tooManyFiles`: more changed files than `maxFilesChanged` (when set). Exactly the limit is fine.
+ *  - `ok`: none of the above.
+ * Both lists are sorted alphabetically. Use `matchesAny` from rules/glob (module 04).
  */
 export function checkScope(changes: FileChange[], policy: ScopePolicy): ScopeReport {
-  const protectedTouched: string[] = [];
-  const outOfScope: string[] = [];
-
-  for (const change of changes) {
-    if (matchesAny(change.path, policy.protected)) protectedTouched.push(change.path);
-    else if (!matchesAny(change.path, policy.allowed)) outOfScope.push(change.path);
-  }
-  protectedTouched.sort();
-  outOfScope.sort();
-
-  const tooManyFiles = policy.maxFilesChanged !== undefined && changes.length > policy.maxFilesChanged;
-  return {
-    ok: protectedTouched.length === 0 && outOfScope.length === 0 && !tooManyFiles,
-    outOfScope,
-    protectedTouched,
-    tooManyFiles,
-  };
+  void changes;
+  void policy;
+  return todo('M05', 'implement checkScope');
 }

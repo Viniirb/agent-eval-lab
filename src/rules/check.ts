@@ -1,53 +1,19 @@
 import type { Rule, Violation } from '../types';
-import { matchesAny, matchesGlob } from './glob';
-
-const IMPORT_RE =
-  /(?:import|export)\s+(?:[^'"\n]*?\s+from\s+)?['"]([^'"]+)['"]|import\(\s*['"]([^'"]+)['"]\s*\)|require\(\s*['"]([^'"]+)['"]\s*\)/g;
-
-function lineOf(text: string, index: number): number {
-  return text.slice(0, index).split('\n').length;
-}
+import { todo } from '../todo';
 
 /**
- * Applies the rules to a set of files ({ "src/a.ts": "content" }) and returns every violation.
- *  - forbidden-pattern: a line in a file matching `paths` matches `pattern`
- *  - required-file: the exact path is missing from `files`
- *  - import-boundary: a file matching `from` imports a specifier matching `disallow`
- *    (static import, `export ... from`, dynamic `import()` and `require()`)
+ * M04. Applies the rules to a set of files ({ "src/a.ts": "content" }) and returns every violation, rule by rule.
+ *  - forbidden-pattern: for each file matching `paths`, each LINE that matches `pattern` is a violation
+ *    { ruleId, message, path, line } (line is 1-based)
+ *  - required-file: when `path` is not a key of `files`, ONE violation { ruleId, message, path } (no line)
+ *  - import-boundary: for each file matching `from`, find the import specifiers and report those that match `disallow`
+ *    (with path and the line where the import starts). Cover ALL of these forms:
+ *        import x from 'a'     import 'a'     export * from 'a'     export { x } from 'a'
+ *        await import('a')     require('a')
+ * Hint: one regular expression with `matchAll` finds all specifiers; count the "\n" before `match.index` for the line.
  */
 export function checkRules(rules: Rule[], files: Record<string, string>): Violation[] {
-  const violations: Violation[] = [];
-
-  for (const rule of rules) {
-    switch (rule.kind) {
-      case 'forbidden-pattern': {
-        const pattern = new RegExp(rule.pattern);
-        for (const [path, content] of Object.entries(files)) {
-          if (!matchesAny(path, rule.paths)) continue;
-          content.split('\n').forEach((text, i) => {
-            if (pattern.test(text)) violations.push({ ruleId: rule.id, message: rule.message, path, line: i + 1 });
-          });
-        }
-        break;
-      }
-      case 'required-file': {
-        if (!(rule.path in files)) violations.push({ ruleId: rule.id, message: rule.message, path: rule.path });
-        break;
-      }
-      case 'import-boundary': {
-        const disallow = new RegExp(rule.disallow);
-        for (const [path, content] of Object.entries(files)) {
-          if (!matchesGlob(path, rule.from)) continue;
-          for (const match of content.matchAll(IMPORT_RE)) {
-            const specifier = match[1] ?? match[2] ?? match[3] ?? '';
-            if (disallow.test(specifier)) {
-              violations.push({ ruleId: rule.id, message: rule.message, path, line: lineOf(content, match.index ?? 0) });
-            }
-          }
-        }
-        break;
-      }
-    }
-  }
-  return violations;
+  void rules;
+  void files;
+  return todo('M04', 'implement checkRules');
 }

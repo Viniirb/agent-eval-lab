@@ -1,5 +1,5 @@
-import { gradeFor } from '../scoring/score';
 import type { RunResult } from '../types';
+import { todo } from '../todo';
 
 export interface AgentSummary {
   agent: string;
@@ -10,22 +10,17 @@ export interface AgentSummary {
   grade: string;
 }
 
-const round1 = (n: number) => Math.round(n * 10) / 10;
-
-/** One line of statistics per agent, best mean first (ties: alphabetical by agent name). */
+/**
+ * M09. One line of statistics per agent: number of runs, mean score rounded to ONE decimal, best, worst and the grade of
+ * the mean (use `gradeFor` from scoring/score). Sorted by mean, best first; ties broken by agent name (alphabetical).
+ */
 export function aggregateByAgent(runs: RunResult[]): AgentSummary[] {
-  const groups = new Map<string, number[]>();
-  for (const r of runs) groups.set(r.agent, [...(groups.get(r.agent) ?? []), r.card.total]);
-  return [...groups.entries()]
-    .map(([agent, scores]) => {
-      const mean = round1(scores.reduce((a, b) => a + b, 0) / scores.length);
-      return { agent, runs: scores.length, mean, best: Math.max(...scores), worst: Math.min(...scores), grade: gradeFor(mean) };
-    })
-    .sort((a, b) => b.mean - a.mean || a.agent.localeCompare(b.agent));
+  void runs;
+  return todo('M09', 'implement aggregateByAgent');
 }
 
 /**
- * Markdown report:
+ * M09. Markdown report, EXACTLY in this format (the test compares the whole text; a final newline at the end):
  *   # Benchmark report
  *   (blank line)
  *   | Agent | Runs | Mean | Best | Worst | Grade |
@@ -33,24 +28,14 @@ export function aggregateByAgent(runs: RunResult[]): AgentSummary[] {
  *   | claude | 3 | 92.3 | 95 | 88 | A |
  *   (blank line, then for each task, sorted by id:)
  *   ## Task: <task id>
+ *   (blank line)
  *   | Agent | Mean |
  *   |---|---|
  *   | claude | 92.3 |
- * With no runs, the report says "No runs yet." under the title.
+ * (the per-task table uses only the runs of that task, same ordering rules)
+ * With no runs the report is the title, a blank line and `No runs yet.`
  */
 export function renderReport(runs: RunResult[]): string {
-  const lines: string[] = ['# Benchmark report', ''];
-  if (runs.length === 0) return [...lines, 'No runs yet.', ''].join('\n');
-
-  lines.push('| Agent | Runs | Mean | Best | Worst | Grade |', '|---|---|---|---|---|---|');
-  for (const s of aggregateByAgent(runs)) {
-    lines.push(`| ${s.agent} | ${s.runs} | ${s.mean} | ${s.best} | ${s.worst} | ${s.grade} |`);
-  }
-
-  const tasks = [...new Set(runs.map((r) => r.task))].sort();
-  for (const task of tasks) {
-    lines.push('', `## Task: ${task}`, '', '| Agent | Mean |', '|---|---|');
-    for (const s of aggregateByAgent(runs.filter((r) => r.task === task))) lines.push(`| ${s.agent} | ${s.mean} |`);
-  }
-  return lines.join('\n') + '\n';
+  void runs;
+  return todo('M09', 'implement renderReport');
 }

@@ -1,8 +1,0 @@
-{
-  "id": "002-parse-duration",
-  "title": "Parse duration strings",
-  "prompt": "Implement parseDuration as described in SPEC.md inside src/index.ts. Follow every rule in RULES.md. Do not modify anything in acceptance/ or the files SPEC.md and RULES.md. Also add a short README.md with usage examples.",
-  "allowed": ["src/**", "README.md"],
-  "protected": ["acceptance/**", "SPEC.md", "RULES.md"],
-  "maxFilesChanged": 6
-}
